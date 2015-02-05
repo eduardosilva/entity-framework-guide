@@ -108,17 +108,17 @@ Console.WriteLine("B name {0}", b.Name.FirstName);
 Use TransactionScope for read uncommited data (NOLOCK)
 
 ```c#
-	var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
-     using (var transactionScope = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
-     {
-         using (var context = new DataContext())
-         {
-             context.Database.Log = Console.WriteLine;
-             var d = context.Departments.ToArray();
-
-
-             transactionScope.Complete();
-         }
-     }
+var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
+using (var transactionScope = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
+{
+	using (var context = new DataContext())
+	{
+		context.Database.Log = Console.WriteLine;
+		var d = context.Departments.ToArray();
+	
+	
+		transactionScope.Complete();
+	}
+}
 
 ```
