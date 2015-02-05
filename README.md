@@ -105,6 +105,7 @@ Console.WriteLine("A name: {0}", a.Name.FirstName);
 Console.WriteLine("B name {0}", b.Name.FirstName);
 ```
 
+```c#
 Use TransactionScope for read uncommited data (NOLOCK)
 
 	var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
@@ -120,3 +121,4 @@ Use TransactionScope for read uncommited data (NOLOCK)
          }
      }
 
+```
