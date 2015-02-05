@@ -1,10 +1,13 @@
 # Entity Framework Lab
 
+### Log
+Use Database.Log for view all sql instructions realized for the context
+
+    // view sql instructions in a console app
+    context.Database.Log = Console.WriteLine
+
+
 ### Mappings
-Readonly DbSet in the context
-```c#
-public DbQuery<Department> Departments { get { return Set<Department>().AsNoTracking(); } }
-```
 Entity implementation with convention mapping
 ```c#
 //Entities
@@ -44,6 +47,10 @@ public class UnicodeConvention : Convention
     }
 }
 ```
+Readonly DbSet in the context
+```c#
+public DbQuery<Department> Departments { get { return Set<Department>().AsNoTracking(); } }
+```
 Automatic load all conventions and configurations
 ```c#
  protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -77,3 +84,39 @@ Automatic load all conventions and configurations
             base.OnModelCreating(modelBuilder);
         }
 ```
+### Queries
+Find method always use Local store before the database
+
+```c#
+// b is loaded from database
+var a = context.Employees.Where(t => t.Id < 5).First();
+var b = context.Employees.First(1);
+
+Console.WriteLine("A name: {0}", a.Name.FirstName);
+Console.WriteLine("B name {0}", b.Name.FirstName);
+```
+
+```c#
+// b is loaded from memory cache
+var a = context.Employees.Where(t => t.Id < 5).First();
+var b = context.Employees.Find(1);
+
+Console.WriteLine("A name: {0}", a.Name.FirstName);
+Console.WriteLine("B name {0}", b.Name.FirstName);
+```
+
+Use TransactionScope for read uncommited data (NOLOCK)
+
+	var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
+     using (var transactionScope = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
+     {
+         using (var context = new DataContext())
+         {
+             context.Database.Log = Console.WriteLine;
+             var d = context.Departments.ToArray();
+
+
+             transactionScope.Complete();
+         }
+     }
+
