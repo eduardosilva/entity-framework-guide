@@ -85,6 +85,20 @@ Automatic load all conventions and configurations
         }
 ```
 ### Queries
+Disable proxy and lazyloading by default
+```c#
+public DataContext()
+{
+    Configuration.ProxyCreationEnabled = false;
+    Configuration.LazyLoadingEnabled = false;
+}
+```
+Use Include method to load referencial properties
+```c#
+var employees = context.Employees.Include(c => c.HistoryDepartments).ToArray();
+```
+
+
 Find method always use Local store before the database
 
 ```c#
@@ -115,8 +129,7 @@ using (var transactionScope = new System.Transactions.TransactionScope(System.Tr
 	{
 		context.Database.Log = Console.WriteLine;
 		var d = context.Departments.ToArray();
-	
-	
+
 		transactionScope.Complete();
 	}
 }
