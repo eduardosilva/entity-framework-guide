@@ -241,7 +241,7 @@ employee.HistoryDepartments.Add(new EmployeeDepartment
 
 context.SaveChanges();
 ```
-Sobreescrvea o método SaveChanges para evitar código duplicado (Ex.: facilitar o preenchimento de campos de auditoria)
+Sobreescreva o método SaveChanges para evitar código duplicado (Ex.: facilitar o preenchimento de campos de auditoria)
 ```c#
 public override int SaveChanges()
 {
