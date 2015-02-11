@@ -1,19 +1,19 @@
 # Entity Framework Lab
 
 ### Introdução
-Abaixo se encontra uma série de dicas sobre Entity Framework, todos utilizando como base de dados AdventureWorks.
+Abaixo se encontra uma série de dicas sobre Entity Framework, todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
 
 ### Log
-Use Database.Log para visualizar todas instruções sql realizadas pelo contexto:
-
-    // Ex.: visualizando as instruções sql em um console app
-    context.Database.Log = Console.WriteLine
-
+Use `Database.Log` para visualizar todas instruções SQL realizadas pelo contexto:
+```c#
+// Visualizando as instruções SQL em um console app
+context.Database.Log = Console.WriteLine
+```
 
 ### Mapeamento
-Exemplo de implementação de entidade com convention mapping:
+Exemplo de implementação de entidade com Convention Mapping:
 ```c#
-//Entities
+// Entities
 public class Entity<T> : IAuditable
     where T : struct
 {
@@ -26,7 +26,7 @@ public interface IAuditable
     DateTime ModifiedDate { get; set; }
 }
 
-//Infrastrucutre > DataAccess > Conventions
+// Infrastrucutre > DataAccess > Conventions
 public class EntityConvention : Convention
 {
     public EntityConvention()
@@ -40,8 +40,8 @@ public class EntityConvention : Convention
     }
 }
 ```
-Exemplo de aplicação de Unicode convention tornando todas as propriedades do tipo string
-varchar ao invés de nvarchar:
+
+Exemplo de aplicação de Unicode convention tornando todas as propriedades do tipo `string` para `VARCHAR` ao invés de `NVARCHAR`:
 ```c#
 public class UnicodeConvention : Convention
 {
@@ -51,10 +51,12 @@ public class UnicodeConvention : Convention
     }
 }
 ```
-Exemplo de como criar um readonly DbSet impedindo operações de escrita para alguns mappings.: (Ex.: Status, Tipos, etc...):
+
+Exemplo de como criar um readonly `DbSet` impedindo operações de escrita para alguns mappings.: (Ex.: Status, Tipos, etc...):
 ```c#
 public DbQuery<Department> Departments { get { return Set<Department>().AsNoTracking(); } }
 ```
+
 Exemplo de como carregar todos os conventions e configurations automaticamente no modelBuilder:
 ```c#
  protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -88,8 +90,9 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
             base.OnModelCreating(modelBuilder);
         }
 ```
+
 ### Consultas
-Desabilitar proxy e lazyloading por padrão:
+Desabilitar [Proxy e LazyLoading](https://msdn.microsoft.com/en-us/data/jj574232.aspx) por padrão:
 ```c#
 public DataContext()
 {
@@ -97,14 +100,15 @@ public DataContext()
     Configuration.LazyLoadingEnabled = false;
 }
 ```
+
 Use o método Include para carregar propriedades complextas quando necessário:
 ```c#
 var employees = context.Employees.Include(e => e.HistoryDepartments)
                          .Include(e => e.HistoryDepartments.Select(h => h.Department))
                          .ToArray();
 ```
-O método Find realiza consulta pela chave do mapeamento e sempre utiliza o cache local antes de realizar uma consulta no banco de dados:
 
+O método `Find` realiza consulta pela chave do mapeamento e sempre que possível, utiliza o cache local antes de realizar uma consulta no banco de dados:
 ```c#
 // b is loaded from database
 var a = context.Employees.Where(t => t.Id < 5).First();
@@ -130,7 +134,7 @@ var employee = context.Employees.Local.FirstOrDefault();
 ```
 
 
-Use TransactionScope para ler linhas que estão em transação (NOLOCK):
+Use `TransactionScope` para ler linhas que estão em transação (NOLOCK):
 
 ```c#
 var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
@@ -170,11 +174,13 @@ var page = query.OrderBy(p => p.Name.FirstName)
 int total = page.Key.Total;
 var people = page.Select(p => p);
 ```
-Utilize SelectMany para agrupar propriedades do tipo coleção:
+
+Utilize `SelectMany` para agrupar propriedades do tipo coleção:
 ```c#
 var jobCandidates = context.Employees.SelectMany(e => e.JobCandidates)
                                      .Where(j => j.ModifiedDate < DateTime.Today).ToArray();
 ```
+
 Concatene consulta para evitar joins desnecessários:
 ```c#
 var query = context.Employees.AsQueryable();
@@ -203,7 +209,7 @@ employee.Name.LastName = "Stwart";
 context.SaveChanges();
 ```
 
-Desabilite ValidateOnSaveEnabled para updates simples:
+Desabilite `ValidateOnSaveEnabled` para updates simples:
 ```c#
 context.Configuration.ValidateOnSaveEnabled = false;
 ```
@@ -241,7 +247,8 @@ employee.HistoryDepartments.Add(new EmployeeDepartment
 
 context.SaveChanges();
 ```
-Sobreescreva o método SaveChanges para evitar código duplicado (Ex.: facilitar o preenchimento de campos de auditoria)
+
+Sobreescreva o método `SaveChanges` para evitar código duplicado (Ex.: facilitar o preenchimento de campos de auditoria)
 ```c#
 public override int SaveChanges()
 {
@@ -263,7 +270,7 @@ private void CheckAudit()
 }
 ```
 
-Desabilite AutoDetectChangesEnabled para maior performance em processo de escrita em lote:
+Desabilite `AutoDetectChangesEnabled` para maior performance em processo de escrita em lote:
 ```c#
 context.Configuration.AutoDetectChangesEnabled = false;
 ```
