@@ -93,7 +93,7 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
 
 ### Consultas
 
-Conseguimos expressar nossas consultas de duas formas em C#, uma utilizando a síntaxe query expression que foi criada com o propósito de facilitar o entendimento por serem parecidas com as consultas criadas em SQL, mas com algumas diferenças, como por exemplo a cláusula from vir antes da cláusula select para não ser perder o intelliSense das ferramentas como Visual Studio. A outra síntaxe é comumente conhecida como dot notation, cuja é o padrão do C#. Está faz referência as chamadas de métodos pelo '.' como obj.Method();
+Conseguimos expressar nossas consultas de duas formas em C#, uma utilizando a síntaxe query expression que foi criada com o propósito de facilitar o entendimento por serem parecidas com as consultas criadas em SQL, mas com algumas diferenças, como por exemplo a cláusula from vir antes da cláusula select para não se perder o intelliSense das ferramentas como Visual Studio. A outra síntaxe é comumente conhecida como dot notation, cuja é o padrão do C#. Esta faz referência as chamadas de métodos pelo '.' como obj.Method();
 
 Exemplos:
 
