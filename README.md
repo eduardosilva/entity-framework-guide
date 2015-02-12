@@ -104,7 +104,7 @@ var a = from employee in context.Employees
 	select employee.Name.FirstName;
 	
 //Exemplo Dot Notation
-var b = context.Employees.Where(t => t.Id == 5).Name..FirstName;
+var b = context.Employees.Where(t => t.Id == 5).Name.FirstName;
 
 Console.WriteLine("A name: {0}", a);
 Console.WriteLine("B name {0}", b);
