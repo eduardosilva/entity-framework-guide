@@ -1,7 +1,7 @@
 # Entity Framework Lab
 
 ### Introdução
-+Abaixo se encontra uma série de dicas sobre Entity Framework (versão 6 ou superior), todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
+Abaixo se encontra uma série de dicas sobre Entity Framework (versão 6 ou superior), todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
 
 ### Log
 Use `Database.Log` para visualizar todas instruções SQL realizadas pelo contexto:
