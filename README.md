@@ -1,7 +1,7 @@
 # Entity Framework Lab
 
 ### Introdução
-Abaixo se encontra uma série de dicas sobre Entity Framework (versão 6 ou superior), todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
+Abaixo se encontra uma série de dicas sobre Entity Framework, todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
 
 ### Log
 Use `Database.Log` para visualizar todas instruções SQL realizadas pelo contexto:
@@ -92,6 +92,24 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
 ```
 
 ### Consultas
+
+Conseguimos expressar nossas consultas de duas formas em C#, uma utilizando a síntaxe query expression que foi criada com o propósito de facilitar o entendimento por serem parecidas com as consultas criadas em SQL, mas com algumas diferenças, como por exemplo a cláusula from vir antes da cláusula select para não ser perder o intelliSense das ferramentas como Visual Studio. A outra síntaxe é comumente conhecida como dot notation, cuja é o padrão do C#. Está faz referência as chamadas de métodos pelo '.' como obj.Method();
+
+Exemplos:
+
+```c#
+// Exemplo Query Expression
+var a = from employee in context.Employees
+	where employee.Id = 5
+	select employee.Name.FirstName;
+	
+//Exemplo Dot Notation
+var b = context.Employees.Where(t => t.Id == 5).Name..FirstName;
+
+Console.WriteLine("A name: {0}", a);
+Console.WriteLine("B name {0}", b);
+```
+
 Desabilitar [Proxy e LazyLoading](https://msdn.microsoft.com/en-us/data/jj574232.aspx) por padrão:
 ```c#
 public DataContext()
