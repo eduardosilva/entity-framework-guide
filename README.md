@@ -93,7 +93,7 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
         }
 ```
 
-Se utilizar ComplexType sempre o deixe inicializado no construtor da classe para que você não tenha problemas com manipulações de instâncias para inserir um novo registro ou utilizando Attach ao invés de dar um Get
+Se utilizar ComplexType sempre o deixe inicializado no construtor da classe, para que você não tenha problemas com manipulações de instâncias ao inserir um novo registro ou utilizando Attach ao invés de dar um Get
 ```c#
 /// <summary>
 /// Classe utilizada como ComplexType
