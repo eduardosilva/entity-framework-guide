@@ -1,5 +1,7 @@
 # Entity Framework Lab
 
+[![Join the chat at https://gitter.im/ITLab-Academy/EntityFrameworkLab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ITLab-Academy/EntityFrameworkLab?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ### Introdução
 Abaixo se encontra uma série de dicas sobre Entity Framework (versão 6 ou superior), todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
 
@@ -91,20 +93,64 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
         }
 ```
 
+Se utilizar ComplexType sempre o deixe inicializado no construtor da classe para que você não tenha problemas com manipulações de instâncias para inserir um novo registro ou utilizando Attach ao invés de dar um Get
+```c#
+/// <summary>
+/// Classe utilizada como ComplexType
+/// </summary>
+public class Name
+{
+    public string Title { get; set; }
+    public string FirstName { get; set; }
+    public string MiddleName { get; set; }
+    public string LastName { get; set; }
+
+    public string FullName()
+    {
+        return String.Format("{0} {1}, {2} {3}", Title, LastName, FirstName, MiddleName);
+    }
+}
+
+public abstract class Person : Entity
+{
+    public Person()
+    {
+        //Inicializando o ComplexType
+        Name = new Name();
+    }
+
+    public Name Name { get; set; }
+    public PersonPassword PasswordConfiguration { get; set; }
+}
+```
+
 ### Consultas
+Em C# podemos escrever nossas consultas utilizando as seguintes sintaxes:
 
-Conseguimos expressar nossas consultas de duas formas em C#, uma utilizando a síntaxe query expression que foi criada com o propósito de facilitar o entendimento por serem parecidas com as consultas criadas em SQL, mas com algumas diferenças, como por exemplo a cláusula from vir antes da cláusula select para não se perder o intelliSense das ferramentas como Visual Studio. A outra síntaxe é comumente conhecida como dot notation, cuja é o padrão do C#. Esta faz referência as chamadas de métodos pelo '.' como obj.Method();
+1. **Query Expression Syntax**.
+	```c#
+	from employee in context.Employees
+	where employee.Id = 5
+	select employee.Name.FirstName;
+	```
+	Parecida com T-SQL, foi criada para facilitar o entendimento da consulta.
+	Algumas diferenças estruturais, como por exmeplo a clausula select estar no fim da instrução, se fizeram necessárias para manter o intellisense.
 
-Exemplos:
+2. **Dot Notation Syntax**. 
+	```c#
+	context.Employees.Where(t => t.Id == 5).Name.FirstName;
+	```
+	Partindo das coleções de dados, é possível agregar operações utilizando os métodos disponibilizados por extensão. E após a consulta ser resolvida navegar nas propriedades dos objetos retornados.
 
+O exemplo abaixo demonstra como uma mesma consulta pode ser realizada utilizando ambas as sintaxes.
 ```c#
 // Exemplo Query Expression
 var a = from employee in context.Employees
-	where employee.Id = 5
-	select employee.Name.FirstName;
+	    where employee.Id = 5
+	    select employee.Name.FirstName;
 	
 //Exemplo Dot Notation
-var b = context.Employees.Where(t => t.Id == 5).Name.FirstName;
+var b = context.Employees.Where(t => t.Id == 5).FirstOrDefault().Name.FirstName;
 
 Console.WriteLine("A name: {0}", a);
 Console.WriteLine("B name {0}", b);
@@ -119,8 +165,12 @@ public DataContext()
 }
 ```
 
-Use o método Include para carregar propriedades complextas quando necessário:
+Use o método Include para carregar propriedades complexas quando necessário:
 ```c#
+using System.Data.Entity;
+
+...
+
 var employees = context.Employees.Include(e => e.HistoryDepartments)
                          .Include(e => e.HistoryDepartments.Select(h => h.Department))
                          .ToArray();
@@ -129,7 +179,7 @@ var employees = context.Employees.Include(e => e.HistoryDepartments)
 O método `Find` realiza consulta pela chave do mapeamento e sempre que possível, utiliza o cache local antes de realizar uma consulta no banco de dados:
 ```c#
 // b is loaded from database
-var a = context.Employees.Where(t => t.Id < 5).First();
+var a = context.Employees.Where(t => t.Id < 5).ToArray().First();
 var b = context.Employees.First(1);
 
 Console.WriteLine("A name: {0}", a.Name.FirstName);
@@ -138,7 +188,7 @@ Console.WriteLine("B name {0}", b.Name.FirstName);
 
 ```c#
 // b is loaded from memory cache
-var a = context.Employees.Where(t => t.Id < 5).First();
+var a = context.Employees.Where(t => t.Id < 5).ToArray().First();
 var b = context.Employees.Find(1);
 
 Console.WriteLine("A name: {0}", a.Name.FirstName);
@@ -147,7 +197,7 @@ Console.WriteLine("B name {0}", b.Name.FirstName);
 
 Para acessar o cache local utilizar a propridade .Local do Dbset
 ```c#
-var employees = context.Employees.Where(t => t.Id < 5);
+var employees = context.Employees.Where(t => t.Id < 5).ToArray();
 var employee = context.Employees.Local.FirstOrDefault();
 ```
 
@@ -168,7 +218,7 @@ using (var transactionScope = new System.Transactions.TransactionScope(System.Tr
 }
 
 ```
-Exemplo de consulta páginada:
+Exemplo de consulta paginada:
 ```c#
 // two call in database
 var query = context.Employees.Where(p => p.Id > 0);
@@ -212,6 +262,13 @@ if (!String.IsNullOrWhiteSpace(departmentName))
     query = query.Where(e => e.HistoryDepartments.Any(h => h.EndDate == null && h.Department.Name.Contains(departmentName)));
 
 var result = query.ToArray();
+```
+
+Utilize default nullables para consultas que retornam Max ou Min afim de evitar problemas quando não retornam nenhum resultado.
+
+```c#
+var minStartDate = context.Employees.SelectMany(e => e.HistoryDepartments)
+                       		    .Min(h => (DateTime?)h.StartDate) ?? DateTime.Today;
 ```
 
 ### Escrita
