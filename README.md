@@ -1,50 +1,131 @@
-# Entity Framework Lab
+# Entity Framework tips and tricks
 
-[![Join the chat at https://gitter.im/ITLab-Academy/EntityFrameworkLab](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ITLab-Academy/EntityFrameworkLab?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+## Introduction
+The purpose of this guide is to provide guidance on building applications using Entity Framework by showing tips and tricks about it.
+All examples was made using [AdventureWorks](https://www.microsoft.com/en-us/download/details.aspx?id=49502) database.
 
-### Introdução
-Abaixo se encontra uma série de dicas sobre Entity Framework (versão 6 ou superior), todos utilizando como base de dados [AdventureWorks](http://msftdbprodsamples.codeplex.com/).
+## Table of Contents
 
-### Log
-Use `Database.Log` para visualizar todas instruções SQL realizadas pelo contexto:
-```c#
-// Visualizando as instruções SQL em um console app
-context.Database.Log = Console.WriteLine
+1. [Structure](#structure)
+1. [Log](#log)
+1. [Mappings and Configurations](#mappings-and-configurations)
+1. [Queries](#queries)
+1. [Writes](#writes)
+1. [Tests](#tests)
+
+## Structure
+* We tried to do this guide using DDD (Domain-driven design). If you already know DDD so you'll be familiarized with folders structure.
 ```
+ ├── Core
+    ├── Entities
+    |   ├── Department.cs
+    |   └── Employee.cs
+    |   └── ...
+    ├── Infrastructure
+    |   ├── DataAccess
+    |   |   ├── Configurations
+    |   |   |   ├── DepartmentConfiguration.cs
+    |   |   |   ├── EmployeeConfiguration.cs
+    |   |   |   ├── ...
+    |   |   ├── Conventions
+    |   |   |   ├── EntityConvention.cs
+    |   |   |   ├── MakeAllStringsNonUnicodeConvention.cs
+    |   |   |   ├── ...
+    |   |   ├── DataContext.cs
+```
+> See more about [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design)
 
-### Mapeamento
-Exemplo de implementação de entidade com Convention Mapping:
+**[Back to top](#table-of-contents)**
+
+## Log
+* Use `Database.Log` to visualize sql instructions in the context:
 ```c#
-// Entities
-public class Entity<T> : IAuditable
-    where T : struct
+// Visualize sql instructions in a console app
+context.Database.Log = Console.WriteLine
+
+//Visualize sql instructions in Visual Studio Output Window 
+Database.Log = (l) => Debug.WriteLine(l);
+```
+   >See more about [Debug.WriteLine on Visual Studio Output Window](https://msdn.microsoft.com/pt-br/library/windows/desktop/ms698739(v=vs.100).aspx)
+
+**[Back to top](#table-of-contents)**
+
+## Mappings and Configurations
+* Use `EntityTypeConfiguration` to mapping your classes instead of inline in the OnModelCreating method. When we have a large number of domain classes to configure, every class in OnModelCreating method can become unmanageable.
+
+```c#
+// Entity class ErrorLog.cs
+public class ErrorLog
 {
-    public T Id { get; set; }
-    public DateTime ModifiedDate { get; set; }
+    public int Id { get; set; }
+    public DateTime Time { get; set; }
+    public string UserName { get; set; }
+    public int Number { get; set; }
+    public int? Severity { get; set; }
+    public int? State { get; set; }
+    public string Procedure { get; set; }
+    public int Line { get; set; }
+    public string Message { get; set; }
 }
 
-public interface IAuditable
+// Configuration class ErrorLogConfiguration.cs
+public class ErrorLogConfiguration : EntityTypeConfiguration<ErrorLog>
 {
-    DateTime ModifiedDate { get; set; }
-}
-
-// Infrastrucutre > DataAccess > Conventions
-public class EntityConvention : Convention
-{
-    public EntityConvention()
+    public ErrorLogConfiguration()
     {
-        Types().Where(t => t.BaseType.GetGenericTypeDefinition() == typeof(Entity<>))
-               .Configure(t =>
-               {
-                   t.Property("Id").IsKey().HasColumnName(t.ClrType.Name + "ID");
-                   t.Property("ModifiedDate").IsRequired();
-               });
+        this.ToTable("ErrorLog");
+
+        this.HasKey(t => t.Id);
+
+        this.Property(t => t.Id)
+            .HasColumnName("ErrorLogID");
+
+        this.Property(t => t.Line)
+            .HasColumnName("ErrorLine");
+
+        this.Property(t => t.Message)
+            .HasColumnName("ErrorMessage")
+            .HasMaxLength(4000);
+
+        this.Property(t => t.Number)
+            .HasColumnName("ErrorNumber")
+            .IsRequired();
+
+        this.Property(t => t.Procedure)
+            .HasColumnName("ErrorProcedure")
+            .HasMaxLength(126);
+
+        this.Property(t => t.Procedure)
+            .HasColumnName("ErrorProcedure")
+            .HasMaxLength(126);
+
+        this.Property(t => t.Severity)
+            .HasColumnName("ErrorSeverity");
+
+        this.Property(t => t.State)
+            .HasColumnName("ErrorState");
+
+        this.Property(t => t.Time)
+            .HasColumnName("ErrorTime")
+            .IsRequired();
+
+        this.Property(t => t.UserName)
+            .HasColumnName("ErrorName")
+            .HasMaxLength(128)
+            .IsRequired();
     }
 }
 ```
+> To see others [mappings models](https://msdn.microsoft.com/en-us/library/jj591617(v=vs.113).aspx) (e.g. Inheritance, Entity Splitting, Table Splitting) 
 
-Exemplo de aplicação de Unicode convention tornando todas as propriedades do tipo `string` para `VARCHAR` ao invés de `NVARCHAR`:
+* Use explicit mapping for all fields and relations. Even convention mapping being a productive resource, the explicit mapping gives data validation before sending it to the database. So you can prevent errors like:
+
+    * String or binary data would be truncated. The statement has been terminated.
+    * The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+
+* To globally set types you can use convention.
 ```c#
+// Using varchar instead of nvarchar for all string types
 public class UnicodeConvention : Convention
 {
     public UnicodeConvention()
@@ -54,12 +135,64 @@ public class UnicodeConvention : Convention
 }
 ```
 
-Exemplo de como criar um readonly `DbSet` impedindo operações de escrita para alguns mappings.: (Ex.: Status, Tipos, etc...):
+* Use conventions to avoid repeated code and to facilitate maintenance
 ```c#
-public DbQuery<Department> Departments { get { return Set<Department>().AsNoTracking(); } }
+// Convention to mapping Entities
+public class EntityConvention : Convention
+{
+    public EntityConvention()
+    {
+        Types().Where(t => t.IsAbstract == false && 
+                            (
+                                (t.BaseType.IsGenericType && t.BaseType.GetGenericTypeDefinition() == typeof(Entity<>)) ||
+                                t.BaseType == typeof(Entity)
+                            )
+                        )
+                .Configure(t =>
+                {
+                    t.Property("Id").IsKey().HasColumnName(t.ClrType.Name + "ID");
+                });
+    }
+}
+
+//Convention to mapping auditable entityes
+public class AuditableConvention : Convention
+{
+    public AuditableConvention()
+    {
+        Types().Where(t => typeof(Auditable).IsAssignableFrom(t))
+                .Configure(t =>
+                {
+                    t.Property("ModifiedDate").IsRequired();
+                });
+    }
+}
+
+//Convention to mapping people (e.g Employee)
+public class PersonConvention : Convention
+{
+    public PersonConvention()
+    {
+        var personType = typeof(Person);
+
+        Types().Where(t => t == personType || t.BaseType == personType)
+                .Configure(t =>
+                {
+                    t.Property("Id").IsKey().HasColumnName("BusinessEntityID");
+                });
+    }
+}
 ```
 
-Exemplo de como carregar todos os conventions e configurations automaticamente no modelBuilder:
+* Create DbSet properties in your context only about classes which you'll really need.
+
+* There are some classes which you never will do write operations (e.g. Views). In these cases, you should use read-only DbQuery to expose them.
+
+```c#
+public virtual DbQuery<IndividualCustomer> IndividualCustomers { get { return Set<IndividualCustomer>().AsNoTracking(); } }
+```
+
+* Load automatically conventions and configurations in the modelBuilder method:
 ```c#
  protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -93,11 +226,9 @@ Exemplo de como carregar todos os conventions e configurations automaticamente n
         }
 ```
 
-Se utilizar ComplexType sempre o deixe inicializado no construtor da classe, para que você não tenha problemas com manipulações de instâncias ao inserir um novo registro ou utilizando Attach ao invés de dar um Get
+* When to use complex type you should initialize it in the constructor method so you avoid problems either inserting a new record or using the attach method.
 ```c#
-/// <summary>
-/// Classe utilizada como ComplexType
-/// </summary>
+//Complex type
 public class Name
 {
     public string Title { get; set; }
@@ -111,52 +242,23 @@ public class Name
     }
 }
 
+//Using a complex type
 public abstract class Person : Entity
 {
     public Person()
     {
-        //Inicializando o ComplexType
+        //Starting the complex type
         Name = new Name();
     }
 
     public Name Name { get; set; }
-    public PersonPassword PasswordConfiguration { get; set; }
+    ...
 }
 ```
+**[Back to top](#table-of-contents)**
 
-### Consultas
-Em C# podemos escrever nossas consultas utilizando as seguintes sintaxes:
-
-1. **Query Expression Syntax**.
-	```c#
-	from employee in context.Employees
-	where employee.Id = 5
-	select employee.Name.FirstName;
-	```
-	Parecida com T-SQL, foi criada para facilitar o entendimento da consulta.
-	Algumas diferenças estruturais, como por exmeplo a clausula select estar no fim da instrução, se fizeram necessárias para manter o intellisense.
-
-2. **Dot Notation Syntax**. 
-	```c#
-	context.Employees.Where(t => t.Id == 5).Name.FirstName;
-	```
-	Partindo das coleções de dados, é possível agregar operações utilizando os métodos disponibilizados por extensão. E após a consulta ser resolvida navegar nas propriedades dos objetos retornados.
-
-O exemplo abaixo demonstra como uma mesma consulta pode ser realizada utilizando ambas as sintaxes.
-```c#
-// Exemplo Query Expression
-var a = from employee in context.Employees
-	    where employee.Id = 5
-	    select employee.Name.FirstName;
-	
-//Exemplo Dot Notation
-var b = context.Employees.Where(t => t.Id == 5).FirstOrDefault().Name.FirstName;
-
-Console.WriteLine("A name: {0}", a);
-Console.WriteLine("B name {0}", b);
-```
-
-Desabilitar [Proxy e LazyLoading](https://msdn.microsoft.com/en-us/data/jj574232.aspx) por padrão:
+## Queries
+* Turn [Proxy and Lazy loading](https://msdn.microsoft.com/en-us/data/jj574232.aspx) off, with this you'll have to manually handle each related property loading:
 ```c#
 public DataContext()
 {
@@ -165,18 +267,19 @@ public DataContext()
 }
 ```
 
-Use o método Include para carregar propriedades complexas quando necessário:
+* Use `Include` method to load complex properties when you need:
 ```c#
-using System.Data.Entity;
+using System.Data.Entity; // need to use lambda expression with Include method
 
 ...
 
 var employees = context.Employees.Include(e => e.HistoryDepartments)
-                         .Include(e => e.HistoryDepartments.Select(h => h.Department))
-                         .ToArray();
+                                 .Include(e => e.HistoryDepartments.Select(h => h.Department))
+                                 .ToArray();
 ```
 
-O método `Find` realiza consulta pela chave do mapeamento e sempre que possível, utiliza o cache local antes de realizar uma consulta no banco de dados:
+* The `Find` method realizes query using the mapping key and always look for the data on the local cache before the database.
+
 ```c#
 // b is loaded from database
 var a = context.Employees.Where(t => t.Id < 5).ToArray().First();
@@ -184,9 +287,8 @@ var b = context.Employees.First(1);
 
 Console.WriteLine("A name: {0}", a.Name.FirstName);
 Console.WriteLine("B name {0}", b.Name.FirstName);
-```
+...
 
-```c#
 // b is loaded from memory cache
 var a = context.Employees.Where(t => t.Id < 5).ToArray().First();
 var b = context.Employees.Find(1);
@@ -195,30 +297,60 @@ Console.WriteLine("A name: {0}", a.Name.FirstName);
 Console.WriteLine("B name {0}", b.Name.FirstName);
 ```
 
-Para acessar o cache local utilizar a propridade .Local do Dbset
+* To access the local cache use `Local` Dbset property.
 ```c#
 var employees = context.Employees.Where(t => t.Id < 5).ToArray();
 var employee = context.Employees.Local.FirstOrDefault();
 ```
 
-
-Use `TransactionScope` para ler linhas que estão em transação (NOLOCK):
-
+* Use `AsNoTracking` method to read-only situations. When you use it the context doesn't cache the result then you can't access the objects in the `Local` property of the DbSets.
 ```c#
-var transactionOptions = new System.Transactions.TransactionOptions { IsolationLevel = IsolationLevel.ReadUncommitted };
-using (var transactionScope = new System.Transactions.TransactionScope(System.Transactions.TransactionScopeOption.Required, transactionOptions))
-{
-	using (var context = new DataContext())
-	{
-		context.Database.Log = Console.WriteLine;
-		var d = context.Departments.ToArray();
-
-		transactionScope.Complete();
-	}
-}
-
+var employees = context.Employees.AsNoTracking().ToArray();
 ```
-Exemplo de consulta paginada:
+
+* Use Projections Queries to load only required data
+```c#
+context.Employees.Select(e => new { e.Id, e.Name });
+```
+> When you use projections queries you don't need to use `AsNoTracking` method.
+
+* Use `Set` method to perform queries on classes does not expose in the context.
+```c#
+var resumes = context.Set<JobCandidate>().Where(j => j.Id > 2)
+                                         .Select(j => j.Resume)
+                                         .ToArray();
+```
+
+* Use `SelectMany` method to group collection properties:
+```c#
+var jobCandidates = context.Employees.SelectMany(e => e.JobCandidates) -- JobCandidates is a collection
+                                      .Where(j => j.ModifiedDate < DateTime.Today).ToArray();
+```
+
+* Concatenate queries to avoid unnecessary joins:
+```c#
+var query = context.Employees.AsQueryable();
+
+if (!String.IsNullOrWhiteSpace(name))
+    query = query.Where(e => e.Name.FirstName.Contains(name) ||
+                             e.Name.MiddleName.Contains(name) ||
+                             e.Name.LastName.Contains(name));
+
+if (!String.IsNullOrWhiteSpace(departmentName))
+    query = query.Where(e => e.HistoryDepartments.Any(h => h.EndDate == null && h.Department.Name.Contains(departmentName)));
+
+var result = query.ToArray();
+```
+> Entity Framework only performs queries after to call methods like `Single`, `SingleOrDefault`, `First`, `FirstOrDefault`, `ToList` or `ToArray`.
+
+
+* Use default null result queries where use Max or Min to avoid problems when them there aren't results.
+```c#
+var minStartDate = context.Employees.SelectMany(e => e.HistoryDepartments)
+                       		        .Min(h => (DateTime?)h.StartDate) ?? DateTime.Today;
+```
+
+* Paged queries with one or two calls.
 ```c#
 // two call in database
 var query = context.Employees.Where(p => p.Id > 0);
@@ -242,54 +374,45 @@ var page = query.OrderBy(p => p.Name.FirstName)
 int total = page.Key.Total;
 var people = page.Select(p => p);
 ```
+> Paged queries with one call works olny simple queries.
 
-Utilize `SelectMany` para agrupar propriedades do tipo coleção:
-```c#
-var jobCandidates = context.Employees.SelectMany(e => e.JobCandidates)
-                                     .Where(j => j.ModifiedDate < DateTime.Today).ToArray();
-```
+**[Back to top](#table-of-contents)**
 
-Concatene consulta para evitar joins desnecessários:
-```c#
-var query = context.Employees.AsQueryable();
 
-if (!String.IsNullOrWhiteSpace(name))
-    query = query.Where(e => e.Name.FirstName.Contains(name) ||
-                             e.Name.MiddleName.Contains(name) ||
-                             e.Name.LastName.Contains(name));
+## Writes
 
-if (!String.IsNullOrWhiteSpace(departmentName))
-    query = query.Where(e => e.HistoryDepartments.Any(h => h.EndDate == null && h.Department.Name.Contains(departmentName)));
-
-var result = query.ToArray();
-```
-
-Utilize default nullables para consultas que retornam Max ou Min afim de evitar problemas quando não retornam nenhum resultado.
+* Use `IValidatableObject` interface to implement custom validations where are executed during `SaveChanges`
 
 ```c#
-var minStartDate = context.Employees.SelectMany(e => e.HistoryDepartments)
-                       		    .Min(h => (DateTime?)h.StartDate) ?? DateTime.Today;
+public class Department : Entity<short>, IValidatableObject
+{
+    public string Name { get; set; }
+    public string GroupName { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        var result = new List<ValidationResult>();
+
+        if (Name == GroupName)
+            result.Add(new ValidationResult("Name and group name cannot be equals"));
+
+        return result;
+    }
+}
 ```
 
-### Escrita
-Exemplo de como realizar um simples update:
-```c#
-var employee = new Employee { Id = 1 };
-context.Employees.Attach(employee);
-context.Entry(employee).State = EntityState.Unchanged;
-
-employee.Name.FirstName = "Jones";
-employee.Name.LastName = "Stwart";
-
-context.SaveChanges();
-```
-
-Desabilite `ValidateOnSaveEnabled` para updates simples:
+* Disablie  `ValidateOnSaveEnabled` when you need performance in write process:
 ```c#
 context.Configuration.ValidateOnSaveEnabled = false;
 ```
 
-Obtenha somente os dados necessários para processos de escrita:
+* Disable `AutoDetectChangesEnabled` when you need performance in write process:
+```c#
+context.Configuration.AutoDetectChangesEnabled = false;
+```
+
+
+* Get only required data to write process.
 ```c#
 int employeeId = 1;
 short departmentId = 1;
@@ -301,8 +424,8 @@ context.Entry(employee).State = EntityState.Unchanged;
 
 // get current department to close
 var oldDepartment = context.Entry(employee)
-                            .Collection(e => e.HistoryDepartments)
-                            .Query().FirstOrDefault(h => h.EndDate == null);
+                           .Collection(e => e.HistoryDepartments)
+                           .Query().FirstOrDefault(h => h.EndDate == null);
 
 oldDepartment.EndDate = DateTime.Now;
 
@@ -322,8 +445,24 @@ employee.HistoryDepartments.Add(new EmployeeDepartment
 
 context.SaveChanges();
 ```
+> Using [`DbSet Extension`](https://gist.github.com/eduardosilva/58d1f672335a6788b9cbb2c2f4e747d3) you can use `GetOrAttach` method 
 
-Sobreescreva o método `SaveChanges` para evitar código duplicado (Ex.: facilitar o preenchimento de campos de auditoria)
+```c#
+...
+
+// from this
+var department = new Department { Id = departmentId };
+context.Departments.Attach(department);
+context.Entry(department).State = EntityState.Unchanged;
+
+//to this
+var department = context.Departments.GetLocalOrAttach(d => d.Id == departmentId, () => new Department { Id = departmentId });
+
+...
+
+```
+
+* Override `SaveChanges` method to add operations before send data to database.
 ```c#
 public override int SaveChanges()
 {
@@ -345,7 +484,91 @@ private void CheckAudit()
 }
 ```
 
-Desabilite `AutoDetectChangesEnabled` para maior performance em processo de escrita em lote:
+* Use `GetValidationErrors` method to get validation errors before execute `SaveChanges`
 ```c#
-context.Configuration.AutoDetectChangesEnabled = false;
+var newDepartment = new Department { };
+context.Departments.Add(newDepartment);
+
+//Get all errros
+var errors = context.GetValidationErrors();
+
+if (!errors.Any())
+    context.SaveChanges();
+
+foreach (var error in errors)
+{
+    Console.WriteLine("Entity Name: " + error.Entry.Entity.GetType().Name);
+    foreach (var entityError in error.ValidationErrors)
+    {
+        Console.WriteLine("Property: {0} | Message {1}", entityError.PropertyName, entityError.ErrorMessage);
+    }
+}
 ```
+
+* Use `GetValidationResult` method to get erros from a specific class
+```c#
+var newDepartment = new Department { Name = "A", GroupName = "A" };
+context.Departments.Add(newDepartment);
+
+var entityErros = context.Entry(newDepartment).GetValidationResult();
+
+if (entityErros.IsValid)
+    context.SaveChanges();
+
+Console.WriteLine("Entity Name: " + entityErros.Entry.Entity.GetType().Name);
+foreach (var error in entityErros.ValidationErrors)
+{
+    Console.WriteLine("Property: {0} | Message {1}", error.PropertyName, error.ErrorMessage);
+}
+
+Console.ReadKey();
+```
+
+**[Back to top](#table-of-contents)**
+
+## Tests
+
+* You can write tests using:
+    * In-memory provider
+    * Fake `Context` and `DbSet`
+    * Frameworks like Moq
+
+```c#
+// Test example using Moq Framework
+
+[TestMethod]
+public void Get_departments()
+{
+    var data = new List<Department>
+    {
+        new Department { Name = "BBB" },
+        new Department { Name = "ZZZ" },
+        new Department { Name = "AAA" },
+    }.AsQueryable();
+
+    var mockSet = new Mock<DbSet<Department>>();
+    mockSet.As<IQueryable<Department>>().Setup(m => m.Provider).Returns(data.Provider);
+    mockSet.As<IQueryable<Department>>().Setup(m => m.Expression).Returns(data.Expression);
+    mockSet.As<IQueryable<Department>>().Setup(m => m.ElementType).Returns(data.ElementType);
+    mockSet.As<IQueryable<Department>>().Setup(m => m.GetEnumerator()).Returns(data.GetEnumerator());
+
+    var mockContext = new Mock<DataContext>();
+    mockContext.Setup(c => c.Departments).Returns(mockSet.Object);
+
+    var context = mockContext.Object;
+
+    var blogs = context.Departments.ToList();
+
+    Assert.AreEqual(3, blogs.Count);
+    Assert.AreEqual("BBB", blogs[0].Name);
+    Assert.AreEqual("ZZZ", blogs[1].Name);
+    Assert.AreEqual("AAA", blogs[2].Name);
+}
+
+```
+
+> See more about [tests](https://msdn.microsoft.com/en-us/library/dn314431(v=vs.113).aspx).
+
+> IMPORTANT: Don't write tests to Entity framework methods write tests to your methods, use de ways above to achieve this.
+
+**[Back to top](#table-of-contents)**

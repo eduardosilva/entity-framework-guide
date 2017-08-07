@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "entity-framework-guide", "entity-framework-guide.csproj", "{A6E9FB86-4F58-409A-B201-0EEAD0873CE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "entity-framework-guide-test", "..\entity-framework-guide-test\entity-framework-guide-test.csproj", "{BB4B3CB7-55E8-44A7-9906-BF6718E6AAEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6E9FB86-4F58-409A-B201-0EEAD0873CE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6E9FB86-4F58-409A-B201-0EEAD0873CE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6E9FB86-4F58-409A-B201-0EEAD0873CE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6E9FB86-4F58-409A-B201-0EEAD0873CE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB4B3CB7-55E8-44A7-9906-BF6718E6AAEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB4B3CB7-55E8-44A7-9906-BF6718E6AAEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB4B3CB7-55E8-44A7-9906-BF6718E6AAEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB4B3CB7-55E8-44A7-9906-BF6718E6AAEE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
