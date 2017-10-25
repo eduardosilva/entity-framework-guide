@@ -3,7 +3,7 @@
 ## Introduction
 
 The purpose of this guide is to provide guidance on building applications using Entity Framework by showing tips and tricks about it.
-All examples was made using [AdventureWorks](https://www.microsoft.com/en-us/download/details.aspx?id=49502) database.
+All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/download/details.aspx?id=49502) database.
 
 ## Table of Contents
 
@@ -59,7 +59,7 @@ Database.Log = (l) => Debug.WriteLine(l);
 
 ## Mappings and Configurations
 
-* Use the `EntityTypeConfiguration` class to mapping your classes instead of inline code in the OnModelCreating method. When we have a large number of domain classes to configure, each class in OnModelCreating method can become unmanageable.
+* Use the `EntityTypeConfiguration` class to mapping your classes instead of inline code in the OnModelCreating method. When we have a large number of domain classes to configure, each class in OnModelCreating method may become unmanageable.
 
 ```c#
 // Entity class ErrorLog.cs
@@ -132,7 +132,7 @@ public class ErrorLogConfiguration : EntityTypeConfiguration<ErrorLog>
   * String or binary data would be truncated. The statement has been terminated.
   * The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
 
-* To global types you should use conventions.
+* Use conventions to global types.
 
 ```c#
 
@@ -146,7 +146,7 @@ public class UnicodeConvention : Convention
 }
 ```
 
-* Use conventions to avoid repeated code and to facilitate maintenance
+* Use conventions to avoid repeated code.
 
 ```c#
 // Convention to mapping Entities
@@ -196,7 +196,7 @@ public class PersonConvention : Convention
 }
 ```
 
-* Create DbSet properties in your context only about classes which you'll really need.
+* Create DbSet properties in your context only on classes which you'll really need.
 
 * There are some classes which you never will write operations (e.g. Views). In these cases, you should use read-only DbQuery to expose them.
 
@@ -239,7 +239,7 @@ public virtual DbQuery<IndividualCustomer> IndividualCustomers { get { return Se
         }
 ```
 
-* When to use complex type you should initialize it in the constructor method so you avoid problems either inserting a new record or using the attach method.
+* When to use complex type you should initialize it in the constructor method, so you avoid problems either inserting a new record or using the attach method.
 
 ```c#
 //Complex type
@@ -287,7 +287,7 @@ public DataContext()
 * Use `Include` method to load complex properties when you need:
 
 ```c#
-using System.Data.Entity; // need to use lambda expression with Include method
+using System.Data.Entity; // needed to use lambda expression with Include method
 
 ...
 
@@ -305,14 +305,7 @@ var b = context.Employees.First(1);
 
 Console.WriteLine("A name: {0}", a.Name.FirstName);
 Console.WriteLine("B name {0}", b.Name.FirstName);
-...
 
-// b is loaded from memory cache
-var a = context.Employees.Where(t => t.Id < 5).ToArray().First();
-var b = context.Employees.Find(1);
-
-Console.WriteLine("A name: {0}", a.Name.FirstName);
-Console.WriteLine("B name {0}", b.Name.FirstName);
 ```
 
 * To access the local cache use `Local` DbSet property.
@@ -322,13 +315,13 @@ var employees = context.Employees.Where(t => t.Id < 5).ToArray();
 var employee = context.Employees.Local.FirstOrDefault();
 ```
 
-* Use `AsNoTracking` method to read-only situations. When you use it the context doesn't cache the result then you can't access the objects in the `Local` property.
+* Use `AsNoTracking` method to read-only situations. When you use it the context doesn't cache, in other words, the objects don't being available to access in the DbSets `Local` property.
 
 ```c#
 var employees = context.Employees.AsNoTracking().ToArray();
 ```
 
-* Use Projections Queries to load only required data
+* Use Projections Queries to load only required data.
 
 ```c#
 context.Employees.Select(e => new { e.Id, e.Name });
@@ -376,7 +369,7 @@ var minStartDate = context.Employees.SelectMany(e => e.HistoryDepartments)
                        		        .Min(h => (DateTime?)h.StartDate) ?? DateTime.Today;
 ```
 
-* Paged queries with one or two calls.
+* Use paged queries with one or two calls to improve performance.
 
 ```c#
 // two calls in the database
@@ -402,13 +395,13 @@ int total = page.Key.Total;
 var people = page.Select(p => p);
 ```
 
-> Paged queries with one call works only with simple queries.
+> WARNING: Complex paged queries with one call may not work.
 
 **[Back to top](#table-of-contents)**
 
 ## Writes
 
-* Use `IValidatableObject` interface to implement custom validations where are executed during `SaveChanges`
+* Use `IValidatableObject` interface to implement custom validations where they are executed during `SaveChanges`
 
 ```c#
 public class Department : Entity<short>, IValidatableObject
