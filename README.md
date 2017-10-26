@@ -11,7 +11,7 @@ All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/do
 1. [Log](#log)
 1. [Mappings and Configurations](#mappings-and-configurations)
 1. [Queries](#queries)
-1. [Writes](#writes)
+1. [Written](#written)
 1. [Tests](#tests)
 
 ## Structure
@@ -399,7 +399,7 @@ var people = page.Select(p => p);
 
 **[Back to top](#table-of-contents)**
 
-## Writes
+## Written
 
 * Use `IValidatableObject` interface to implement custom validations where they are executed during `SaveChanges`
 
@@ -505,6 +505,67 @@ private void CheckAudit()
         item.ModifiedDate = DateTime.Now;
     }
 }
+
+...
+
+// See the same action using ChangeTracker class
+public class AudityChangeTracker : ChangeTracker<Auditable>
+{
+    public override void Added(Auditable entity)
+    {
+        entity.ModifiedDate = DateTime.Now;
+    }
+
+    public override void Deleted(Auditable entity)
+    {
+
+    }
+
+    public override void Updated(Auditable entity)
+    {
+        entity.ModifiedDate = DateTime.Now;
+    }
+}
+
+...
+
+public override int SaveChanges()
+{
+    CheckChanges();
+    return base.SaveChanges();
+
+}
+
+private void CheckChanges()
+{
+    var trackersChange = typeof(DataContext).Assembly.GetTypes()
+                                                    .Where(t => t.IsAbstract == false &&
+                                                                typeof(IChangeTracker).IsAssignableFrom(t))
+                                                    .Select(t =>
+                                                    {
+                                                        dynamic trackerChangeInstance = Activator.CreateInstance(t);
+                                                        return trackerChangeInstance;
+                                                    })
+                                                    .Cast<IChangeTracker>()
+                                                    .Select(t =>
+                                                    {
+                                                        t.Context = this;
+                                                        return t;
+                                                    })
+                                                    .ToArray();
+
+    var trackedEntities = ChangeTracker.Entries()
+                                        .Where(e => trackersChange.Any(tc => tc.CanApplyTo(e.Entity)))
+                                        .ToArray();
+
+    foreach (var trackEntity in trackedEntities)
+    {
+        var trackers = trackersChange.Where(t => t.CanApplyTo(trackEntity.Entity)).ToList();
+
+        trackers.ForEach(t => t.ApplyTo(trackEntity));
+    }
+}
+
 ```
 
 * Use `GetValidationErrors` method to get validation errors before execute `SaveChanges`

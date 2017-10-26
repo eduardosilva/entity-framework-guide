@@ -77,6 +77,8 @@
     <Compile Include="Core\Infrastructure\DataAccess\Conventions\PersonConvention.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\DataContext.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Extensions\DbSetExtensions.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\ChangeTrackers\AudityTrackerChange.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\ChangeTrackers\TrackerChange.cs" />
     <Compile Include="Core\Name.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

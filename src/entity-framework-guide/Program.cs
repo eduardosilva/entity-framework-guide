@@ -13,7 +13,13 @@ namespace entity_framework_guide
     {
         static void Main(string[] args)
         {
+            using (var context = new DataContext())
+            {
+                var e = context.Employees.First();
+                e.NationalIDNumber = "295847284";
 
+                context.SaveChanges();
+            }
         }
     }
 }

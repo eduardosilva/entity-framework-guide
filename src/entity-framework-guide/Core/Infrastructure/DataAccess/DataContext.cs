@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration;
 using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using entity_framework_guide.Core.Entities;
-using entity_framework_guide.Core.Infrastructure.DataAccess.Configurations;
+using entity_framework_guide.Core.Infrastructure.DataAccess.ChangeTrackers;
 
 namespace entity_framework_guide.Core.Infrastructure.DataAccess
 {
@@ -35,50 +31,67 @@ namespace entity_framework_guide.Core.Infrastructure.DataAccess
 
         public override int SaveChanges()
         {
-            CheckAudit();
+            CheckChanges();
             return base.SaveChanges();
+
         }
 
-        private void CheckAudit()
+        private void CheckChanges()
         {
-            foreach (var itemChanged in ChangeTracker.Entries().Where(e => e.Entity is Auditable))
+            var trackersChange = typeof(DataContext).Assembly.GetTypes()
+                                                         .Where(t => t.IsAbstract == false &&
+                                                                     typeof(IChangeTracker).IsAssignableFrom(t))
+                                                         .Select(t =>
+                                                         {
+                                                             dynamic trackerChangeInstance = Activator.CreateInstance(t);
+                                                             return trackerChangeInstance;
+                                                         })
+                                                         .Cast<IChangeTracker>()
+                                                         .Select(t =>
+                                                         {
+                                                             t.Context = this;
+                                                             return t;
+                                                         })
+                                                         .ToArray();
+
+            var trackedEntities = ChangeTracker.Entries()
+                                               .Where(e => trackersChange.Any(tc => tc.CanApplyTo(e.Entity)))
+                                               .ToArray();
+
+            foreach (var trackEntity in trackedEntities)
             {
-                if (!(itemChanged.State == EntityState.Added || itemChanged.State == EntityState.Modified))
-                    continue;
+                var trackers = trackersChange.Where(t => t.CanApplyTo(trackEntity.Entity)).ToList();
 
-
-                var item = itemChanged.Entity as Auditable;
-                item.ModifiedDate = DateTime.Now;
+                trackers.ForEach(t => t.ApplyTo(trackEntity));
             }
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            var configurationTypes = typeof(DataContext).Assembly.GetTypes()
-                                                                 .Where(t => t.IsAbstract == false &&
-                                                                             t.BaseType != null &&
-                                                                             t.BaseType.IsGenericType &&
-                                                                             (t.BaseType.GetGenericTypeDefinition() == typeof(EntityTypeConfiguration<>) ||
-                                                                             t.BaseType.GetGenericTypeDefinition() == typeof(ComplexTypeConfiguration<>)))
-                                                                 .ToArray();
+            var assemblyTypes = typeof(DataContext).Assembly.GetTypes();
 
-            foreach (var configurationType in configurationTypes)
-            {
-                dynamic configurationTypeInstance = Activator.CreateInstance(configurationType);
-                modelBuilder.Configurations.Add(configurationTypeInstance);
-            }
+            //add entities and complex types configurations
+            assemblyTypes.Where(t => t.IsAbstract == false &&
+                                     t.BaseType != null &&
+                                     t.BaseType.IsGenericType &&
+                                     (t.BaseType.GetGenericTypeDefinition() == typeof(EntityTypeConfiguration<>) ||
+                                     t.BaseType.GetGenericTypeDefinition() == typeof(ComplexTypeConfiguration<>)))
+                         .ToList()
+                         .ForEach(t =>
+                         {
+                             dynamic instance = Activator.CreateInstance(t);
+                             modelBuilder.Configurations.Add(instance);
+                         });
 
-            var conventionTypes = typeof(DataContext).Assembly.GetTypes()
-                                                              .Where(t => t.IsAbstract == false &&
-                                                                          t.BaseType != null &&
-                                                                          t.BaseType == typeof(Convention))
-                                                              .ToArray();
-
-            foreach (var conventionType in conventionTypes)
-            {
-                dynamic configurationTypeInstance = Activator.CreateInstance(conventionType);
-                modelBuilder.Conventions.Add(configurationTypeInstance);
-            }
+            // add conventions
+            assemblyTypes.Where(t => t.IsAbstract == false &&
+                                     t.BaseType != null &&
+                                     t.BaseType == typeof(Convention))
+                         .ToList().ForEach(t => 
+                         {
+                             dynamic instance = Activator.CreateInstance(t);
+                             modelBuilder.Conventions.Add(instance);
+                         });
 
             base.OnModelCreating(modelBuilder);
         }
