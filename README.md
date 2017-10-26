@@ -509,6 +509,7 @@ private void CheckAudit()
 ...
 
 // See the same action using ChangeTracker class
+// for more details see the source code
 public class AudityChangeTracker : ChangeTracker<Auditable>
 {
     public override void Added(Auditable entity)
