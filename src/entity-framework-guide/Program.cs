@@ -13,6 +13,8 @@ namespace entity_framework_guide
     {
         static void Main(string[] args)
         {
+            Database.SetInitializer<DataContext>(null);
+
             using (var context = new DataContext())
             {
                 var e = context.Employees.First();

@@ -59,6 +59,173 @@ Database.Log = (l) => Debug.WriteLine(l);
 
 ## Mappings and Configurations
 
+* Define as null database initialization when you don't use migrations (good to production environment).
+
+**Example without database strategy initialization**
+
+```bash
+Opened connection at 26/10/2017 17:23:38 -02:00
+
+
+SELECT Count(*)
+FROM INFORMATION_SCHEMA.TABLES AS t
+WHERE t.TABLE_SCHEMA + '.' + t.TABLE_NAME IN ('HumanResources.Department','Person.Person','HumanResources.EmployeeDepartmentHistory','HumanResources.Shift','HumanResources.JobCandidate','Person.Password','dbo.ErrorLog','HumanResources.Employee')
+    OR t.TABLE_NAME = 'EdmMetadata'
+
+
+-- Executing at 26/10/2017 17:23:38 -02:00
+
+-- Completed in 157 ms with result: 8
+
+
+
+Closed connection at 26/10/2017 17:23:38 -02:00
+
+'entity-framework-guide.vshost.exe' (CLR v4.0.30319: entity-framework-guide.vshost.exe): Loaded 'C:\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Runtime.Serialization\v4.0_4.0.0.0__b77a5c561934e089\System.Runtime.Serialization.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
+Opened connection at 26/10/2017 17:23:38 -02:00
+
+SELECT 
+    [GroupBy1].[A1] AS [C1]
+    FROM ( SELECT 
+        COUNT(1) AS [A1]
+        FROM [dbo].[__MigrationHistory] AS [Extent1]
+        WHERE [Extent1].[ContextKey] = @p__linq__0
+    )  AS [GroupBy1]
+
+
+-- p__linq__0: 'entity_framework_guide.Core.Infrastructure.DataAccess.DataContext' (Type = String, Size = 4000)
+
+-- Executing at 26/10/2017 17:23:38 -02:00
+
+-- Failed in 38 ms with error: Invalid object name 'dbo.__MigrationHistory'.
+
+
+
+Closed connection at 26/10/2017 17:23:38 -02:00
+
+Opened connection at 26/10/2017 17:23:38 -02:00
+
+SELECT 
+    [GroupBy1].[A1] AS [C1]
+    FROM ( SELECT 
+        COUNT(1) AS [A1]
+        FROM [dbo].[__MigrationHistory] AS [Extent1]
+    )  AS [GroupBy1]
+
+
+-- Executing at 26/10/2017 17:23:38 -02:00
+
+-- Failed in 1 ms with error: Invalid object name 'dbo.__MigrationHistory'.
+
+
+
+Closed connection at 26/10/2017 17:23:38 -02:00
+
+'entity-framework-guide.vshost.exe' (CLR v4.0.30319: entity-framework-guide.vshost.exe): Loaded 'EntityFrameworkDynamicProxies-EntityFramework'. 
+Opened connection at 26/10/2017 17:23:38 -02:00
+
+'entity-framework-guide.vshost.exe' (CLR v4.0.30319: entity-framework-guide.vshost.exe): Loaded 'EntityFrameworkDynamicProxies-entity-framework-guide'. 
+SELECT 
+    [Limit1].[C1] AS [C1], 
+    [Limit1].[BusinessEntityID] AS [BusinessEntityID], 
+    [Limit1].[Title] AS [Title], 
+    [Limit1].[FirstName] AS [FirstName], 
+    [Limit1].[MiddleName] AS [MiddleName], 
+    [Limit1].[LastName] AS [LastName], 
+    [Limit1].[ModifiedDate] AS [ModifiedDate], 
+    [Limit1].[NationalIDNumber] AS [NationalIDNumber]
+    FROM ( SELECT TOP (1) 
+        [Extent1].[BusinessEntityID] AS [BusinessEntityID], 
+        [Extent1].[NationalIDNumber] AS [NationalIDNumber], 
+        [Extent2].[Title] AS [Title], 
+        [Extent2].[FirstName] AS [FirstName], 
+        [Extent2].[MiddleName] AS [MiddleName], 
+        [Extent2].[LastName] AS [LastName], 
+        [Extent2].[ModifiedDate] AS [ModifiedDate], 
+        '1X0X' AS [C1]
+        FROM  [HumanResources].[Employee] AS [Extent1]
+        INNER JOIN [Person].[Person] AS [Extent2] ON [Extent1].[BusinessEntityID] = [Extent2].[BusinessEntityID]
+    )  AS [Limit1]
+
+
+-- Executing at 26/10/2017 17:23:39 -02:00
+
+-- Completed in 1560 ms with result: SqlDataReader
+
+
+
+Closed connection at 26/10/2017 17:23:40 -02:00
+```
+**Example with null database initialization**
+
+```bash
+
+SELECT 
+    [Limit1].[C1] AS [C1], 
+    [Limit1].[BusinessEntityID] AS [BusinessEntityID], 
+    [Limit1].[Title] AS [Title], 
+    [Limit1].[FirstName] AS [FirstName], 
+    [Limit1].[MiddleName] AS [MiddleName], 
+    [Limit1].[LastName] AS [LastName], 
+    [Limit1].[ModifiedDate] AS [ModifiedDate], 
+    [Limit1].[NationalIDNumber] AS [NationalIDNumber]
+    FROM ( SELECT TOP (1) 
+        [Extent1].[BusinessEntityID] AS [BusinessEntityID], 
+        [Extent1].[NationalIDNumber] AS [NationalIDNumber], 
+        [Extent2].[Title] AS [Title], 
+        [Extent2].[FirstName] AS [FirstName], 
+        [Extent2].[MiddleName] AS [MiddleName], 
+        [Extent2].[LastName] AS [LastName], 
+        [Extent2].[ModifiedDate] AS [ModifiedDate], 
+        '1X0X' AS [C1]
+        FROM  [HumanResources].[Employee] AS [Extent1]
+        INNER JOIN [Person].[Person] AS [Extent2] ON [Extent1].[BusinessEntityID] = [Extent2].[BusinessEntityID]
+    )  AS [Limit1]
+
+
+-- Executing at 26/10/2017 17:25:23 -02:00
+
+-- Completed in 0 ms with result: SqlDataReader
+
+
+```
+
+* Don't use database initialization strategy inside the context, because this way is difficult to change the strategy in a different environment. For example, in integrated tests we can create a SQL compact database to perform tests, but to do this it is necessary to create the database for all tests, so in this case, The application can use `Database.SetInitializer<DataContext>(null)` and to tests can use `Database.SetInitializer<DataContext>(new DropCreateDatabaseAlways<DataContext>())`
+
+```c#
+//wrong
+public DataContext()
+{
+    //Very wrong
+    Database.SetInitializer<DataContext>(null);
+
+    Configuration.LazyLoadingEnabled = false;
+    Configuration.ProxyCreationEnabled = false;
+
+
+    Database.Log = (l) =>
+    {
+        Console.WriteLine(l); //ONLY CONSOLE APP
+        Debug.WriteLine(l);
+    };
+}
+
+...
+
+//Good
+protected void Application_Start()
+{
+  Database.SetInitializer<DataContext>(null);
+
+  AreaRegistration.RegisterAllAreas();
+  RegisterGlobalFilters(GlobalFilters.Filters);
+  RegisterRoutes(RouteTable.Routes);
+  ...
+}
+
+```
+
+
 * Use the `EntityTypeConfiguration` class to mapping your classes instead of inline code in the OnModelCreating method. When we have a large number of domain classes to configure, each class in OnModelCreating method may become unmanageable.
 
 ```c#
