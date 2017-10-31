@@ -41,9 +41,9 @@ All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/do
 
 * Don't use repository or unit of work patterns, to try to resolve performance problems using these patterns is hard. To not repeat others guys who also recommends not use these patterns I'll show you some goods articles about this subject:
 
-* [Repository is the new singleton](https://ayende.com/blog/3955/repository-is-the-new-singleton)
-* [Night of the living repositories](https://ayende.com/blog/3973/night-of-the-living-repositories)
-* [The false myth of encapsulating data access in the DAL](https://ayende.com/blog/4567/the-false-myth-of-encapsulating-data-access-in-the-dal)
+  * [Repository is the new singleton](https://ayende.com/blog/3955/repository-is-the-new-singleton)
+  * [Night of the living repositories](https://ayende.com/blog/3973/night-of-the-living-repositories)
+  * [The false myth of encapsulating data access in the DAL](https://ayende.com/blog/4567/the-false-myth-of-encapsulating-data-access-in-the-dal)
 
 **[Back to top](#table-of-contents)**
 
