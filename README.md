@@ -10,6 +10,7 @@ All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/do
 1. [Structure](#structure)
 1. [Log](#log)
 1. [Mappings and Configurations](#mappings-and-configurations)
+1. [Migrations](#migrations)
 1. [Queries](#queries)
 1. [Written](#written)
 1. [Tests](#tests)
@@ -19,22 +20,22 @@ All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/do
 * We tried to do this guide using DDD (Domain-driven design). If you already know DDD so you'll be familiarized with folders structure.
 
 ``` c#
- ├── Core
-    ├── Entities
-    |   ├── Department.cs
-    |   └── Employee.cs
-    |   └── ...
-    ├── Infrastructure
-    |   ├── DataAccess
-    |   |   ├── Configurations
-    |   |   |   ├── DepartmentConfiguration.cs
-    |   |   |   ├── EmployeeConfiguration.cs
-    |   |   |   ├── ...
-    |   |   ├── Conventions
-    |   |   |   ├── EntityConvention.cs
-    |   |   |   ├── MakeAllStringsNonUnicodeConvention.cs
-    |   |   |   ├── ...
-    |   |   ├── DataContext.cs
+ ├── Entities
+ |   ├── Department.cs
+ |   └── Employee.cs
+ |   └── ...
+ ├── Infrastructure
+ |   ├── DataAccess
+ |   |   ├── Configurations
+ |   |   |   ├── DepartmentConfiguration.cs
+ |   |   |   ├── EmployeeConfiguration.cs
+ |   |   |   ├── ...
+ |   |   ├── Conventions
+ |   |   |   ├── EntityConvention.cs
+ |   |   |   ├── MakeAllStringsNonUnicodeConvention.cs
+ |   |   |   ├── ...
+ |   |   ├── Migrations
+ |   |   ├── DataContext.cs
 ```
 
 > See more about [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design)
@@ -441,6 +442,17 @@ public abstract class Person : Entity
     public Name Name { get; set; }
     ...
 }
+```
+
+**[Back to top](#table-of-contents)**
+
+## Migrations
+
+* Put Migrations class together with yours data accesses classes:
+
+```bash
+Enable-Migrations -MigrationsDirectory "Core\Infrastructure\DataAccess\Migrations"
+
 ```
 
 **[Back to top](#table-of-contents)**
