@@ -382,35 +382,12 @@ public virtual DbQuery<IndividualCustomer> IndividualCustomers { get { return Se
 
 ```c#
  protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            var assemblyTypes = typeof(DataContext).Assembly.GetTypes();
+{
+    var assembly = typeof(AppDbContext).Assembly;
 
-            var configurationTypes = assemblyTypes.Where(t => t.IsAbstract == false &&
-                                                              t.BaseType != null &&
-                                                              t.BaseType.IsGenericType &&
-                                                              (t.BaseType.GetGenericTypeDefinition() == typeof(EntityTypeConfiguration<>) ||
-                                                              t.BaseType.GetGenericTypeDefinition() == typeof(ComplexTypeConfiguration<>)))
-                                                   .ToArray();
-
-            foreach (var configurationType in configurationTypes)
-            {
-                dynamic configurationTypeInstance = Activator.CreateInstance(configurationType);
-                modelBuilder.Configurations.Add(configurationTypeInstance);
-            }
-
-            var conventionTypes = assemblyTypes.Where(t => t.IsAbstract == false &&
-                                                           t.BaseType != null &&
-                                                           t.BaseType == typeof(Convention))
-                                               .ToArray();
-
-            foreach (var conventionType in conventionTypes)
-            {
-                dynamic configurationTypeInstance = Activator.CreateInstance(conventionType);
-                modelBuilder.Conventions.Add(configurationTypeInstance);
-            }
-
-            base.OnModelCreating(modelBuilder);
-        }
+    modelBuilder.Configurations.AddFromAssembly(assembly);
+    modelBuilder.Conventions.AddFromAssembly(assembly);
+}
 ```
 
 * When to use complex type you should initialize it in the constructor method, so you avoid problems either inserting a new record or using the attach method.
