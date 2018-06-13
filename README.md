@@ -425,7 +425,7 @@ public abstract class Person : Entity
 
 ## Migrations
 
-* Put Migrations class together with yours data accesses classes:
+* Put Migrations class together with yours data access classes:
 
 ```bash
 Enable-Migrations -MigrationsDirectory "Core\Infrastructure\DataAccess\Migrations"
