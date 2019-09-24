@@ -432,6 +432,15 @@ Enable-Migrations -MigrationsDirectory "Core\Infrastructure\DataAccess\Migration
 
 ```
 
+### Migrations in a Existing Database
+
+```bash
+Add-Migration InitialCreate –IgnoreChanges 
+```
+
+Reference https://docs.microsoft.com/en-us/ef/ef6/modeling/code-first/migrations/existing-database
+
+
 **[Back to top](#table-of-contents)**
 
 ## Queries
