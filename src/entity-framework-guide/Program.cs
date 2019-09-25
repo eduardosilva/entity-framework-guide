@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,4 +25,36 @@ namespace entity_framework_guide
             }
         }
     }
+
+    // Migration Example
+    //class Program
+    //{
+    //    static void Main(string[] args)
+    //    {
+    //        Database.SetInitializer<DataContext>(null);
+
+    //        using (var context = new DataContext())
+    //        {
+    //            var e = context.Employees.First();
+    //            e.NationalIDNumber = "295847284";
+
+    //            context.SaveChanges();
+    //        }
+    //    }
+
+    //    public class Supplier : Entity
+    //    {
+    //        public string Name { get; set; }
+    //    }
+
+    //    public class SupplierConfiguration : EntityTypeConfiguration<Supplier>
+    //    {
+    //        public SupplierConfiguration()
+    //        {
+    //            ToTable(tableName: "Supplier", schemaName: "Bootcamp");
+
+    //            Property(t => t.Name).HasMaxLength(250);
+    //        }
+    //    }
+    //}
 }

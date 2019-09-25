@@ -80,6 +80,15 @@
     <Compile Include="Core\Infrastructure\DataAccess\Extensions\DbSetExtensions.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\ChangeTrackers\AudityTrackerChange.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\ChangeTrackers\TrackerChange.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909242112136_InitialCreate.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909242112136_InitialCreate.designer.cs">
+      <DependentUpon>201909242112136_InitialCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.designer.cs">
+      <DependentUpon>201909250152025_AddingSupplier.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Core\Infrastructure\DataAccess\Migrations\Configuration.cs" />
     <Compile Include="Core\Name.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -88,7 +97,14 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Core\Infrastructure\DataAccess\Migrations\201909242112136_InitialCreate.resx">
+      <DependentUpon>201909242112136_InitialCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.resx">
+      <DependentUpon>201909250152025_AddingSupplier.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

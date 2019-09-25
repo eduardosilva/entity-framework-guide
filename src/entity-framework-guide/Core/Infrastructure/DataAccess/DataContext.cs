@@ -68,30 +68,10 @@ namespace entity_framework_guide.Core.Infrastructure.DataAccess
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            var assemblyTypes = typeof(DataContext).Assembly.GetTypes();
+            var assembly = typeof(DataContext).Assembly;
 
-            //add entities and complex types configurations
-            assemblyTypes.Where(t => t.IsAbstract == false &&
-                                     t.BaseType != null &&
-                                     t.BaseType.IsGenericType &&
-                                     (t.BaseType.GetGenericTypeDefinition() == typeof(EntityTypeConfiguration<>) ||
-                                     t.BaseType.GetGenericTypeDefinition() == typeof(ComplexTypeConfiguration<>)))
-                         .ToList()
-                         .ForEach(t =>
-                         {
-                             dynamic instance = Activator.CreateInstance(t);
-                             modelBuilder.Configurations.Add(instance);
-                         });
-
-            // add conventions
-            assemblyTypes.Where(t => t.IsAbstract == false &&
-                                     t.BaseType != null &&
-                                     t.BaseType == typeof(Convention))
-                         .ToList().ForEach(t => 
-                         {
-                             dynamic instance = Activator.CreateInstance(t);
-                             modelBuilder.Conventions.Add(instance);
-                         });
+            modelBuilder.Configurations.AddFromAssembly(assembly);
+            modelBuilder.Conventions.AddFromAssembly(assembly);
 
             base.OnModelCreating(modelBuilder);
         }

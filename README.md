@@ -432,6 +432,14 @@ Enable-Migrations -MigrationsDirectory "Core\Infrastructure\DataAccess\Migration
 
 ```
 
+* Gerente scripts file when necessary
+
+```bash
+Update-Database -Script -SourceMigration: $InitialDatabase -TargetMigration: AddPostAbstract
+```
+
+Reference https://docs.microsoft.com/en-us/ef/ef6/modeling/code-first/migrations/
+
 ### Migrations in a Existing Database
 
 ```bash
