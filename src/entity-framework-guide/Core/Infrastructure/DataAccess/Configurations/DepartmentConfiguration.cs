@@ -14,7 +14,7 @@ namespace entity_framework_guide.Core.Infrastructure.DataAccess.Configurations
         {
             ToTable(tableName: "Department", schemaName: "HumanResources");
 
-            //Property(t => t.Id).HasColumnName("DepartmentID");
+            Property(t => t.Id).HasColumnName("DepartmentID");
             Property(t => t.Name).IsRequired();
             Property(t => t.GroupName).IsRequired();
         }

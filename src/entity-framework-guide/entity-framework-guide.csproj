@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\Entities\DatabaseLog.cs" />
     <Compile Include="Core\Entities\Employee.cs" />
     <Compile Include="Core\Entities\EmployeeDepartment.cs" />
     <Compile Include="Core\Entities\ErrorLog.cs" />
@@ -61,7 +62,12 @@
     <Compile Include="Core\Entities\JobCandidate.cs" />
     <Compile Include="Core\Entities\Person.cs" />
     <Compile Include="Core\Entities\PersonPassword.cs" />
+    <Compile Include="Core\Entities\Products\Photo.cs" />
+    <Compile Include="Core\Entities\Products\Product.cs" />
+    <Compile Include="Core\Entities\Products\ProductPhoto.cs" />
+    <Compile Include="Core\Entities\Products\SubCategory.cs" />
     <Compile Include="Core\Entities\Shift.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Configurations\DatabaseLogConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\DepartmentConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\EmployeeConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\EmployeeDepartmentConfiguration.cs" />
@@ -70,7 +76,11 @@
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\NameConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\PersonConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\PersonPasswordConfiguration.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Configurations\PhotoConfiguration.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Configurations\ProductConfiguration.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Configurations\ProductPhotoConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Configurations\ShiftConfiguration.cs" />
+    <Compile Include="Core\Infrastructure\DataAccess\Configurations\SubCategoryConfiguration.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Conventions\AuditableConvention.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Conventions\MakeAllStringsNonUnicodeConvention.cs" />
     <Compile Include="Core\Infrastructure\DataAccess\Conventions\EntityConvention.cs" />
@@ -84,10 +94,6 @@
     <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909242112136_InitialCreate.designer.cs">
       <DependentUpon>201909242112136_InitialCreate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.cs" />
-    <Compile Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.designer.cs">
-      <DependentUpon>201909250152025_AddingSupplier.cs</DependentUpon>
-    </Compile>
     <Compile Include="Core\Infrastructure\DataAccess\Migrations\Configuration.cs" />
     <Compile Include="Core\Name.cs" />
     <Compile Include="Program.cs" />
@@ -100,9 +106,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Core\Infrastructure\DataAccess\Migrations\201909242112136_InitialCreate.resx">
       <DependentUpon>201909242112136_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Core\Infrastructure\DataAccess\Migrations\201909250152025_AddingSupplier.resx">
-      <DependentUpon>201909250152025_AddingSupplier.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
