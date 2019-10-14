@@ -14,6 +14,6 @@ namespace entity_framework_guide.Core.Entities
         }
 
         public Name Name { get; set; }
-        public PersonPassword PasswordConfiguration { get; set; }
+        // public PersonPassword PasswordConfiguration { get; set; }
     }
 }
