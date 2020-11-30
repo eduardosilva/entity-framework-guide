@@ -576,6 +576,59 @@ var people = page.Select(p => p);
 
 > WARNING: Complex paged queries with one call may not work.
 
+* Reuse your queries with property projections
+
+```c#
+    public class ProductListViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+
+        public static Expression<Func<Product, ProductListViewModel>> Projection
+        {
+            get
+            {
+                return p => new ProductListViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                };
+
+            }
+        }
+    }
+
+    ...
+
+    var result = context.Products.Select(PhotoListItemViewModel.Projection)
+                        .ToArray();
+```
+
+or
+
+```c#
+    public class ProductProjetions
+    {
+        public static Expression<Func<Product, dynamic>> ProductListViewModel
+        {
+            get
+            {
+                return p => new
+                {
+                    Id = p.Id,
+                    Name = p.Name
+                };
+
+            }
+        }
+    }
+
+    ...
+
+    var result = context.Products.Select(ProductProjetions.ProductListViewModel)
+                                 .ToArray();
+```
+
 **[Back to top](#table-of-contents)**
 
 ## Written
