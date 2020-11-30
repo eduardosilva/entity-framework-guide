@@ -3,7 +3,7 @@
 ## Introduction
 
 The purpose of this guide is to provide guidance on building applications using Entity Framework by showing tips and tricks about it.
-All examples were made using [AdventureWorks](https://www.microsoft.com/en-us/download/details.aspx?id=49502) database.
+All examples were made using [AdventureWorks](https://docs.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver15&tabs=ssms) database.
 
 ## Table of Contents
 
