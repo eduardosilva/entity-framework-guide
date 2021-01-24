@@ -12,7 +12,7 @@ All examples were made using [AdventureWorks](https://docs.microsoft.com/en-us/s
 1. [Mappings and Configurations](#mappings-and-configurations)
 1. [Migrations](#migrations)
 1. [Queries](#queries)
-1. [Written](#written)
+1. [Write](#write)
 1. [Tests](#tests)
 
 ## Structure
@@ -631,7 +631,7 @@ or
 
 **[Back to top](#table-of-contents)**
 
-## Written
+## Write
 
 * Use `IValidatableObject` interface to implement custom validations where they are executed during `SaveChanges`
 
