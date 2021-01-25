@@ -52,6 +52,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="01-General Configurations.cs" />
+    <Compile Include="02.Mappings.cs" />
+    <Compile Include="03.Queries.cs" />
+    <Compile Include="04.Write.cs" />
     <Compile Include="Core\Entities\DatabaseLog.cs" />
     <Compile Include="Core\Entities\Employee.cs" />
     <Compile Include="Core\Entities\EmployeeDepartment.cs" />
@@ -96,6 +100,7 @@
     </Compile>
     <Compile Include="Core\Infrastructure\DataAccess\Migrations\Configuration.cs" />
     <Compile Include="Core\Name.cs" />
+    <Compile Include="Core\Services\EmployeeService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

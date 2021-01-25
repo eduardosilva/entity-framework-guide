@@ -10,51 +10,54 @@ using entity_framework_guide.Core.Infrastructure.DataAccess;
 
 namespace entity_framework_guide
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Database.SetInitializer<DataContext>(null);
+	partial class Program
+	{
+		static void Main(string[] args)
+		{
+			//Database.SetInitializer<DataContext>(null);
 
-            using (var context = new DataContext())
-            {
-                var e = context.Employees.First();
-                e.NationalIDNumber = "295847284";
+			using (var context = new DataContext())
+			{
+				var e = context.Employees.ToArray();
+				foreach (var i in e)
+				{
+					Console.WriteLine(i.Name);
+				}
+			}
 
-                context.SaveChanges();
-            }
-        }
-    }
+			Console.Read();
+		}
+	}
 
-    // Migration Example
-    //class Program
-    //{
-    //    static void Main(string[] args)
-    //    {
-    //        Database.SetInitializer<DataContext>(null);
+	// Migration Example
+	//class Program
+	//{
+	//    static void Main(string[] args)
+	//    {
+	//        Database.SetInitializer<DataContext>(null);
 
-    //        using (var context = new DataContext())
-    //        {
-    //            var e = context.Employees.First();
-    //            e.NationalIDNumber = "295847284";
+	//        using (var context = new DataContext())
+	//        {
+	//            var e = context.Employees.First();
+	//            e.NationalIDNumber = "295847284";
 
-    //            context.SaveChanges();
-    //        }
-    //    }
+	//            context.SaveChanges();
+	//        }
+	//    }
 
-    //    public class Supplier : Entity
-    //    {
-    //        public string Name { get; set; }
-    //    }
+	//    public class Supplier : Entity
+	//    {
+	//        public string Name { get; set; }
+	//    }
 
-    //    public class SupplierConfiguration : EntityTypeConfiguration<Supplier>
-    //    {
-    //        public SupplierConfiguration()
-    //        {
-    //            ToTable(tableName: "Supplier", schemaName: "Bootcamp");
+	//    public class SupplierConfiguration : EntityTypeConfiguration<Supplier>
+	//    {
+	//        public SupplierConfiguration()
+	//        {
+	//            ToTable(tableName: "Supplier", schemaName: "Bootcamp");
 
-    //            Property(t => t.Name).HasMaxLength(250);
-    //        }
-    //    }
-    //}
+	//            Property(t => t.Name).HasMaxLength(250);
+	//        }
+	//    }
+	//}
 }

@@ -16,19 +16,6 @@ namespace entity_framework_guide.Core.Infrastructure.DataAccess
         public virtual DbSet<Shift> Shifts { get; set; }
         public virtual DbSet<ErrorLog> Logs { get; set; }
 
-        public DataContext()
-        {
-            Configuration.LazyLoadingEnabled = false;
-            Configuration.ProxyCreationEnabled = false;
-
-
-            Database.Log = (l) =>
-            {
-                Console.WriteLine(l); //ONLY CONSOLE APP
-                Debug.WriteLine(l);
-            };
-        }
-
         public override int SaveChanges()
         {
             CheckChanges();

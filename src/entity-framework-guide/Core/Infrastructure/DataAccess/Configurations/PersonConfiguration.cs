@@ -13,7 +13,6 @@ namespace entity_framework_guide.Core.Infrastructure.DataAccess.Configurations
         public PersonConfiguration()
         {
             ToTable("Person", "Person");
-            // HasOptional(t => t.PasswordConfiguration).WithRequired();
         }
     }
 }
