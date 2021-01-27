@@ -40,7 +40,7 @@ All examples were made using [AdventureWorks](https://docs.microsoft.com/en-us/s
 
 > See more about [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driven_design)
 
-* Don't use repository or unit of work patterns, to try to resolve performance problems using these patterns is hard. To not repeat others guys who also recommends not use these patterns I'll show you some goods articles about this subject:
+* Don't use repository or unit of work patterns, to try to resolve performance problems using these patterns is hard. Not to repeat others guys who also recommends not use these patterns, I'll show you some good articles about this subject:
 
   * [Repository is the new singleton](https://ayende.com/blog/3955/repository-is-the-new-singleton)
   * [Night of the living repositories](https://ayende.com/blog/3973/night-of-the-living-repositories)
@@ -68,7 +68,7 @@ Database.Log = (l) => Debug.WriteLine(l);
 
 * Define as null database initialization when you don't use migrations (good to production environment).
 
-**Example without database strategy initialization**
+### Example without database strategy initialization
 
 ```bash
 Opened connection at 26/10/2017 17:23:38 -02:00
@@ -163,7 +163,8 @@ SELECT
 
 Closed connection at 26/10/2017 17:23:40 -02:00
 ```
-**Example with null database initialization**
+
+### Example with null database initialization
 
 ```bash
 
@@ -197,7 +198,7 @@ SELECT
 
 ```
 
-* Don't use database initialization strategy inside the context, because this way is difficult to change the strategy in a different environment. For example, in integrated tests we can create a SQL compact database to perform tests, but to do this it is necessary to create the database for all tests, so in this case, The application can use `Database.SetInitializer<DataContext>(null)` and to tests can use `Database.SetInitializer<DataContext>(new DropCreateDatabaseAlways<DataContext>())`
+* Don't use database initialization strategy inside the context, because is difficult to change the strategy in a different environment. For example, in integrated tests we can create a SQL compact database to perform tests, but to do this it is necessary to create the database for all tests, so in this case, The application can use `Database.SetInitializer<DataContext>(null)` and to tests can use `Database.SetInitializer<DataContext>(new DropCreateDatabaseAlways<DataContext>())`
 
 ```c#
 //wrong
@@ -231,7 +232,6 @@ protected void Application_Start()
 }
 
 ```
-
 
 * Use the `EntityTypeConfiguration` class to mapping your classes instead of inline code in the OnModelCreating method. When we have a large number of domain classes to configure, each class in OnModelCreating method may become unmanageable.
 
@@ -303,8 +303,8 @@ public class ErrorLogConfiguration : EntityTypeConfiguration<ErrorLog>
 
 * Use explicit mapping for all properties and relations. Even convention mapping being a productive resource, the explicit mapping gives us data validation before to send it to the database. So you can prevent errors like:
 
-  * String or binary data would be truncated. The statement has been terminated.
-  * The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value.
+  * *"String or binary data would be truncated. The statement has been terminated."*
+  * *"The conversion of a datetime2 data type to a datetime data type resulted in an out-of-range value."*
 
 * Use conventions to global types.
 
@@ -390,7 +390,7 @@ public virtual DbQuery<IndividualCustomer> IndividualCustomers { get { return Se
 }
 ```
 
-* When to use complex type you should initialize it in the constructor method, so you avoid problems either inserting a new record or using the attach method.
+* When to use complex type you should initialize it in the constructor, so you avoid problems either inserting a new record or using the attach method.
 
 ```c#
 //Complex type
@@ -432,7 +432,7 @@ Enable-Migrations -MigrationsDirectory "Core\Infrastructure\DataAccess\Migration
 
 ```
 
-* Gerente scripts file when necessary
+* Generate scripts file when necessary
 
 ```bash
 Update-Database -Script -SourceMigration: $InitialDatabase -TargetMigration: AddPostAbstract
@@ -447,7 +447,6 @@ Add-Migration InitialCreate –IgnoreChanges
 ```
 
 Reference https://docs.microsoft.com/en-us/ef/ef6/modeling/code-first/migrations/existing-database
-
 
 **[Back to top](#table-of-contents)**
 
@@ -494,7 +493,7 @@ var employees = context.Employees.Where(t => t.Id < 5).ToArray();
 var employee = context.Employees.Local.FirstOrDefault();
 ```
 
-* Use `AsNoTracking` method to read-only situations. When you use it the context doesn't cache, in other words, the objects don't being available to access in the DbSets `Local` property.
+* Use `AsNoTracking` method to read-only situations. When you use it the context doesn't cache, in other words, the objects aren't available to access them in the DbSets `Local` property.
 
 ```c#
 var employees = context.Employees.AsNoTracking().ToArray();
@@ -633,7 +632,7 @@ or
 
 ## Write
 
-* Use `IValidatableObject` interface to implement custom validations where they are executed during `SaveChanges`
+* Use `IValidatableObject` interface to implement custom validations. They are executed during `SaveChanges` call.
 
 ```c#
 public class Department : Entity<short>, IValidatableObject

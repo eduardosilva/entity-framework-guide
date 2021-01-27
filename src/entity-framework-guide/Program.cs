@@ -10,24 +10,24 @@ using entity_framework_guide.Core.Infrastructure.DataAccess;
 
 namespace entity_framework_guide
 {
-	partial class Program
-	{
-		static void Main(string[] args)
-		{
-			//Database.SetInitializer<DataContext>(null);
+	//partial class Program
+	//{
+	//	static void Main(string[] args)
+	//	{
+	//		//Database.SetInitializer<DataContext>(null);
 
-			using (var context = new DataContext())
-			{
-				var e = context.Employees.ToArray();
-				foreach (var i in e)
-				{
-					Console.WriteLine(i.Name);
-				}
-			}
+	//		using (var context = new DataContext())
+	//		{
+	//			var e = context.Employees.ToArray();
+	//			foreach (var i in e)
+	//			{
+	//				Console.WriteLine(i.Name);
+	//			}
+	//		}
 
-			Console.Read();
-		}
-	}
+	//		Console.Read();
+	//	}
+	//}
 
 	// Migration Example
 	//class Program
